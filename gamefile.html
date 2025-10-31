@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower Blocks Typing Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .game-info {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .info-box {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .game-area {
+            display: flex;
+            width: 100%;
+            gap: 20px;
+        }
+
+        .tower-container {
+            flex: 1;
+            height: 400px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tower-base {
+            width: 80%;
+            height: 20px;
+            background-color: #8B4513;
+            border-radius: 5px;
+            position: absolute;
+            bottom: 0;
+        }
+
+        .block {
+            height: 30px;
+            margin: 2px 0;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+            color: #333;
+        }
+
+        .typing-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .current-text {
+            font-size: 1.5rem;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.5;
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        #text-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            text-align: left;
+            outline: none;
+            resize: none;
+            height: 100px;
+        }
+
+        .input-feedback {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            height: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #start-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #reset-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .instructions {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .instructions h2 {
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .game-over h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .final-stats {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            width: 300px;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-weight: normal;
+        }
+
+        .stat-value {
+            font-weight: bold;
+        }
+
+        .level-indicator {
+            margin-top: 10px;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+            }
+            
+            .tower-container {
+                height: 200px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .game-info {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Tower Blocks Typing Game</h1>
+            <p class="subtitle">Type sentences correctly to build your tower as high as possible!</p>
+        </header>
+        
+        <div class="game-info">
+            <div class="info-box">
+                <div class="info-label">SCORE</div>
+                <div class="info-value" id="score">0</div>
+            </div>
+            <div class="info-box">
+                <div class="info-label">LEVEL</div>
+                <div class="info-value" id="level">1</div>
+            </div>
+            <div class="info-box">
+                <div class="info-label">TIME</div>
+                <div class="info-value" id="timer">60</div>
+            </div>
+            <div class="info-box">
+                <div class="info-label">ACCURACY</div>
+                <div class="info-value" id="accuracy">100%</div>
+            </div>
+            <div class="info-box">
+                <div class="info-label">WPM</div>
+                <div class="info-value" id="wpm">0</div>
+            </div>
+            <div class="info-box">
+                <div class="info-label">BACKSPACES</div>
+                <div class="info-value" id="backspaces">0</div>
+            </div>
+            <div class="info-box">
+                <div class="info-label">COMPLETED</div>
+                <div class="info-value" id="completed">0</div>
+            </div>
+            <div class="info-box">
+                <div class="info-label">MISTAKES</div>
+                <div class="info-value" id="mistakes">0</div>
+            </div>
+        </div>
+        
+        <div class="level-indicator" id="level-indicator">Level 1: Simple Sentences</div>
+        
+        <div class="game-area">
+            <div class="tower-container">
+                <div class="tower-base"></div>
+                <div class="game-over">
+                    <h2>Game Over!</h2>
+                    <div class="final-stats">
+                        <div class="stat-row">
+                            <span class="stat-label">Final Score:</span>
+                            <span class="stat-value" id="final-score">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Level Reached:</span>
+                            <span class="stat-value" id="final-level">1</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Accuracy:</span>
+                            <span class="stat-value" id="final-accuracy">100%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Average WPM:</span>
+                            <span class="stat-value" id="final-wpm">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Backspaces Used:</span>
+                            <span class="stat-value" id="final-backspaces">0</span>
+                        </div>
+                    </div>
+                    <button id="restart-btn">Play Again</button>
+                </div>
+            </div>
+            
+            <div class="typing-area">
+                <div class="current-text" id="current-text">Press Start to Play</div>
+                <div class="input-container">
+                    <textarea id="text-input" placeholder="Type the text here" disabled></textarea>
+                    <div class="input-feedback" id="input-feedback"></div>
+                </div>
+                <div class="controls">
+                    <button id="start-btn">Start Game</button>
+                    <button id="reset-btn">Reset</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h2>How to Play</h2>
+            <ul>
+                <li>Type the text shown above as quickly and accurately as possible</li>
+                <li>Each correct sentence adds a block to your tower</li>
+                <li>Complete sentences before the timer runs out</li>
+                <li>Your score increases with each correct sentence</li>
+                <li>The game gets harder as you level up with longer and more complex sentences</li>
+                <li>Your accuracy, typing speed (WPM), and backspace usage are tracked</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Game variables
+        let score = 0;
+        let level = 1;
+        let timeLeft = 60;
+        let gameActive = false;
+        let timer;
+        let backspaceCount = 0;
+        let totalKeystrokes = 0;
+        let correctKeystrokes = 0;
+        let completedSentences = 0;
+        let mistakeCount = 0;
+        let startTime;
+        let currentSentence = "";
+        let wpm = 0;
+        
+        // Sentences by level (increasing difficulty)
+        const sentencesByLevel = {
+            1: [
+                "The sun is bright.",
+                "I like to code.",
+                "Dogs are friendly.",
+                "She reads books.",
+                "We eat food.",
+                "He runs fast.",
+                "Cats are cute.",
+                "They play games.",
+                "You are nice.",
+                "It is warm."
+            ],
+            2: [
+                "Programming is a valuable skill in today's world.",
+                "The quick brown fox jumps over the lazy dog.",
+                "Learning to type quickly can improve productivity.",
+                "Practice makes perfect when learning new skills.",
+                "JavaScript is a popular programming language.",
+                "Typing games can help improve your speed.",
+                "The weather today is sunny and warm.",
+                "Reading books expands your knowledge.",
+                "Exercise is important for good health.",
+                "Coding requires logical thinking and patience."
+            ],
+            3: [
+                "Mastering touch typing can significantly increase your efficiency when working with computers.",
+                "The intricate details of programming languages require dedicated study and practice.",
+                "Modern web development involves understanding multiple technologies and frameworks.",
+                "Algorithmic thinking is essential for solving complex computational problems.",
+                "Data structures form the foundation of efficient software development.",
+                "User interface design requires both aesthetic sensibility and technical knowledge.",
+                "Cloud computing has revolutionized how businesses deploy and scale applications.",
+                "Cybersecurity measures are increasingly important in our interconnected world.",
+                "Artificial intelligence and machine learning are transforming various industries.",
+                "Effective communication skills are crucial for successful collaboration in tech teams."
+            ],
+            4: [
+                "The fundamental principles of object-oriented programming include encapsulation, inheritance, and polymorphism.",
+                "Understanding computational complexity helps developers write more efficient algorithms.",
+                "Modern full-stack development requires proficiency in both front-end and back-end technologies.",
+                "The software development lifecycle encompasses planning, implementation, testing, and maintenance.",
+                "Version control systems like Git are essential tools for collaborative software projects.",
+                "Responsive web design ensures optimal viewing experiences across various device sizes.",
+                "Database normalization reduces data redundancy and improves data integrity.",
+                "Agile methodologies promote iterative development and adaptive planning in software projects.",
+                "Application programming interfaces enable different software systems to communicate effectively.",
+                "Continuous integration and deployment pipelines automate the software release process."
+            ],
+            5: [
+                "The implementation of sophisticated neural networks requires substantial computational resources and specialized knowledge.",
+                "Quantum computing represents a paradigm shift in how we approach complex computational problems.",
+                "Developing secure distributed systems necessitates careful consideration of potential attack vectors.",
+                "The evolution of programming languages reflects changing priorities in software engineering practices.",
+                "Containerization technologies have transformed application deployment and scalability strategies.",
+                "Microservices architecture enables greater flexibility and resilience in large-scale applications.",
+                "Progressive web applications combine the best features of native and web-based software solutions.",
+                "The integration of machine learning models into production systems presents unique engineering challenges.",
+                "Blockchain technology introduces novel approaches to data integrity and decentralized consensus.",
+                "Edge computing reduces latency by processing data closer to its source rather than in centralized clouds."
+            ]
+        };
+        
+        const levelDescriptions = {
+            1: "Simple Sentences",
+            2: "Medium Sentences",
+            3: "Longer Sentences",
+            4: "Complex Sentences",
+            5: "Advanced Technical Sentences"
+        };
+
+        // DOM elements
+        const scoreElement = document.getElementById('score');
+        const levelElement = document.getElementById('level');
+        const timerElement = document.getElementById('timer');
+        const accuracyElement = document.getElementById('accuracy');
+        const wpmElement = document.getElementById('wpm');
+        const backspacesElement = document.getElementById('backspaces');
+        const completedElement = document.getElementById('completed');
+        const mistakesElement = document.getElementById('mistakes');
+        const currentTextElement = document.getElementById('current-text');
+        const textInput = document.getElementById('text-input');
+        const inputFeedback = document.getElementById('input-feedback');
+        const startBtn = document.getElementById('start-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const towerContainer = document.querySelector('.tower-container');
+        const gameOverScreen = document.querySelector('.game-over');
+        const finalScoreElement = document.getElementById('final-score');
+        const finalLevelElement = document.getElementById('final-level');
+        const finalAccuracyElement = document.getElementById('final-accuracy');
+        const finalWpmElement = document.getElementById('final-wpm');
+        const finalBackspacesElement = document.getElementById('final-backspaces');
+        const levelIndicator = document.getElementById('level-indicator');
+
+        // Block colors
+        const blockColors = [
+            "#FF6B6B", "#4ECDC4", "#FFD166", "#06D6A0", "#118AB2",
+            "#073B4C", "#EF476F", "#7209B7", "#3A86FF", "#FB5607"
+        ];
+
+        // Initialize game
+        function initGame() {
+            score = 0;
+            level = 1;
+            timeLeft = 60;
+            gameActive = false;
+            backspaceCount = 0;
+            totalKeystrokes = 0;
+            correctKeystrokes = 0;
+            completedSentences = 0;
+            mistakeCount = 0;
+            wpm = 0;
+            
+            scoreElement.textContent = score;
+            levelElement.textContent = level;
+            timerElement.textContent = timeLeft;
+            accuracyElement.textContent = "100%";
+            wpmElement.textContent = wpm;
+            backspacesElement.textContent = backspaceCount;
+            completedElement.textContent = completedSentences;
+            mistakesElement.textContent = mistakeCount;
+            currentTextElement.textContent = "Press Start to Play";
+            textInput.value = "";
+            inputFeedback.textContent = "";
+            levelIndicator.textContent = `Level ${level}: ${levelDescriptions[level]}`;
+            
+            // Clear tower blocks
+            const blocks = document.querySelectorAll('.block');
+            blocks.forEach(block => block.remove());
+            
+            // Hide game over screen
+            gameOverScreen.style.display = 'none';
+            
+            // Disable input
+            textInput.disabled = true;
+        }
+
+        // Start game
+        function startGame() {
+            if (gameActive) return;
+            
+            gameActive = true;
+            textInput.disabled = false;
+            textInput.focus();
+            startTime = new Date();
+            
+            // Start timer
+            timer = setInterval(updateTimer, 1000);
+            
+            // Get first sentence
+            getNewSentence();
+            
+            // Start WPM calculation
+            setInterval(calculateWPM, 1000);
+        }
+
+        // Update timer
+        function updateTimer() {
+            timeLeft--;
+            timerElement.textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        // Get a new random sentence based on current level
+        function getNewSentence() {
+            const sentences = sentencesByLevel[level];
+            const randomIndex = Math.floor(Math.random() * sentences.length);
+            currentSentence = sentences[randomIndex];
+            currentTextElement.textContent = currentSentence;
+            textInput.value = "";
+            inputFeedback.textContent = "";
+        }
+
+        // Check typed text
+        function checkText() {
+            if (!gameActive) return;
+            
+            const typedText = textInput.value;
+            
+            // Update keystroke counts
+            totalKeystrokes = typedText.length;
+            
+            // Count correct characters
+            let correctChars = 0;
+            for (let i = 0; i < typedText.length; i++) {
+                if (i < currentSentence.length && typedText[i] === currentSentence[i]) {
+                    correctChars++;
+                }
+            }
+            correctKeystrokes = correctChars;
+            
+            // Update accuracy
+            const accuracy = totalKeystrokes > 0 ? Math.round((correctKeystrokes / totalKeystrokes) * 100) : 100;
+            accuracyElement.textContent = `${accuracy}%`;
+            
+            // Check if sentence is complete and correct
+            if (typedText === currentSentence) {
+                // Correct sentence
+                inputFeedback.textContent = "Correct!";
+                inputFeedback.style.color = "#4CAF50";
+                addBlock();
+                increaseScore();
+                completedSentences++;
+                completedElement.textContent = completedSentences;
+                
+                // Check for level up
+                if (completedSentences % 5 === 0 && level < 5) {
+                    levelUp();
+                }
+                
+                // Get new sentence
+                getNewSentence();
+            } else if (currentSentence.startsWith(typedText)) {
+                // Partially correct
+                inputFeedback.textContent = "Keep typing...";
+                inputFeedback.style.color = "#FFC107";
+            } else {
+                // Incorrect
+                inputFeedback.textContent = "Incorrect! Check your typing.";
+                inputFeedback.style.color = "#F44336";
+                mistakeCount++;
+                mistakesElement.textContent = mistakeCount;
+            }
+        }
+
+        // Add a block to the tower
+        function addBlock() {
+            const block = document.createElement('div');
+            block.className = 'block';
+            
+            // Color based on level
+            const colorIndex = (level - 1) % blockColors.length;
+            block.style.backgroundColor = blockColors[colorIndex];
+            block.style.width = `${Math.max(20, 80 - completedSentences * 0.5)}%`;
+            block.textContent = `Level ${level}`;
+            
+            // Add block to tower
+            towerContainer.insertBefore(block, towerContainer.firstChild);
+            
+            // Add animation
+            block.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                block.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        // Increase score
+        function increaseScore() {
+            // Score increases with level
+            score += level * 10;
+            scoreElement.textContent = score;
+        }
+
+        // Level up
+        function levelUp() {
+            level++;
+            levelElement.textContent = level;
+            levelIndicator.textContent = `Level ${level}: ${levelDescriptions[level]}`;
+            
+            // Add time as reward
+            timeLeft += 10;
+            if (timeLeft > 60) timeLeft = 60;
+            timerElement.textContent = timeLeft;
+            
+            // Flash level up message
+            inputFeedback.textContent = `Level ${level} Unlocked!`;
+            inputFeedback.style.color = "#9C27B0";
+            
+            setTimeout(() => {
+                if (gameActive) {
+                    inputFeedback.textContent = "";
+                }
+            }, 1500);
+        }
+
+        // Calculate WPM
+        function calculateWPM() {
+            if (!gameActive || !startTime) return;
+            
+            const now = new Date();
+            const minutesElapsed = (now - startTime) / 60000; // Convert to minutes
+            
+            if (minutesElapsed > 0) {
+                // WPM = (total characters typed / 5) / minutes elapsed
+                wpm = Math.round((correctKeystrokes / 5) / minutesElapsed);
+                wpmElement.textContent = wpm;
+            }
+        }
+
+        // Track backspaces
+        function trackBackspaces(e) {
+            if (!gameActive) return;
+            
+            if (e.key === 'Backspace') {
+                backspaceCount++;
+                backspacesElement.textContent = backspaceCount;
+            }
+        }
+
+        // End game
+        function endGame() {
+            gameActive = false;
+            clearInterval(timer);
+            textInput.disabled = true;
+            
+            // Calculate final accuracy
+            const finalAccuracy = totalKeystrokes > 0 ? 
+                Math.round((correctKeystrokes / totalKeystrokes) * 100) : 100;
+            
+            // Show game over screen with stats
+            finalScoreElement.textContent = score;
+            finalLevelElement.textContent = level;
+            finalAccuracyElement.textContent = `${finalAccuracy}%`;
+            finalWpmElement.textContent = wpm;
+            finalBackspacesElement.textContent = backspaceCount;
+            gameOverScreen.style.display = 'flex';
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', startGame);
+        
+        resetBtn.addEventListener('click', () => {
+            clearInterval(timer);
+            initGame();
+        });
+        
+        restartBtn.addEventListener('click', () => {
+            initGame();
+            startGame();
+        });
+        
+        textInput.addEventListener('input', checkText);
+        
+        textInput.addEventListener('keydown', trackBackspaces);
+
+        // Initialize game on load
+        window.onload = initGame;
+    </script>
+</body>
+</html>
